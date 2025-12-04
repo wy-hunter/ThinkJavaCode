@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 import javax.swing.JFrame;
 
 /**
@@ -21,6 +24,68 @@ public class Conway {
         grid.turnOn(1, 7);
         grid.turnOn(2, 7);
         grid.turnOn(3, 7);
+    }
+
+    public Conway(String path) { // Exercise 3 and 4
+        int row = 0, col = 0, index = 0, line = 0;
+        boolean bandaid = false; // for position 0,0
+        int[][] list = new int[100][2];
+        File file = new File(path);
+        String[] fileType = path.split("[.]");
+        String data;
+        try (Scanner scan = new Scanner(file)) {
+            if (fileType[1].equals("cells")) {
+                data = scan.nextLine(); // Skip line 1
+                while (scan.hasNextLine()) {
+                data = scan.nextLine();
+                for (int i = 0; i < data.length(); ++i) {
+                    if (data.charAt(i) == 'O') {
+                        if (row == 0 && i == 0) bandaid = true;
+                        list[index][0] = row;
+                        list[index][1] = i;
+                        index += 1;
+                    }
+                    if (row == 0) col = data.length();
+                }
+                    row += 1;
+                }
+                grid = new GridCanvas(row, col, 20);
+                for (int[] i: list) {
+                    if (i[0] != 0 && i[1] != 0) {
+                        grid.turnOn(i[0], i[1]);
+                    } else {
+                        if (bandaid) grid.turnOn(0,0);
+                    }
+                }
+            }
+            if (fileType[1].equals("rle")) {
+                while (scan.hasNextLine()) {
+                    data = scan.nextLine();
+                    if (data.charAt(0) != '#') {
+                        if (line == 0) { // First line
+                            String[] init = data.replace(',', ' ').split("[ ]");
+                            grid = new GridCanvas(Integer.parseInt(init[6]), Integer.parseInt(init[2]), 20);
+                        } else { // Other lines
+                            for (int i = 0; i < data.length(); ++i) {
+                                // This implementation ignores numbers because I am reading the assignment and reference and
+                                // neither explain what the number characters in the file mean so I am ignoring it.
+                                if (data.charAt(i) == '$') { 
+                                    row += 1; 
+                                    col = 0; 
+                                }
+                                if (data.charAt(i) == 'o') grid.turnOn(row, col);
+                                if (data.charAt(i) == 'b' || data.charAt(i) == 'o') col += 1;
+                                if (data.charAt(i) == '!') break;
+                            }
+                        }
+                        line += 1;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /**
@@ -136,7 +201,8 @@ public class Conway {
      */
     public static void main(String[] args) {
         String title = "Conway's Game of Life";
-        Conway game = new Conway();
+        //Conway game = new Conway();
+        Conway game = new Conway("glider.rle");
         JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);

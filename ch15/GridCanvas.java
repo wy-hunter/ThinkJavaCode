@@ -88,9 +88,25 @@ public class GridCanvas extends Canvas {
                 return 1;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            // cell doesn't exist
+            if (r > array.length) r -= array.length;
+            if (r < 0) r += array.length;
+            if (c > array.length) c -= array.length;
+            if (c < 0) c += array.length;
+            if (array[r][c].isOn()) {
+                return 1;
+            }
         }
         return 0;
+    }
+
+    public int countOn () {
+        int count = 0;
+        for (Cell[] c : array) {
+            for (Cell d: c) {
+                if (d.isOn()) count += 1;
+            }
+        }
+        return count;
     }
 
     /**
@@ -126,4 +142,19 @@ public class GridCanvas extends Canvas {
         draw(g);
     }
 
+    public static void main(String[] args) {
+        GridCanvas g = new GridCanvas(10, 10, 10);
+        for (int i = 0; i < 10; ++i) {
+            for (int j = 0; j < 10; ++j) {
+                if ((i + j) % 2 == 0) g.turnOn(i,j);
+            }
+        }
+        System.out.println(g.countOn()); // Test Exercise 1
+        int i = g.test(5,5); // Test Exercise 2
+        System.out.println(i);
+        i = g.test(6,5);
+        System.out.println(i);
+        i = g.test(15,5); 
+        System.out.println(i);
+    }
 }
